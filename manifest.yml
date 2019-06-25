@@ -1,7 +1,7 @@
 ---
 applications:
   - name: tk-pal-tracker
-    path: build/libs/pal-tracke
+    path: build/libs/pal-tracker.jar
     routes:
       - route: tkwlq-tracker.cfapps.io
     env:

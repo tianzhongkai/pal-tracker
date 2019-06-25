@@ -1,50 +1,58 @@
 package io.pivotal.pal.tracker;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-public class InMemoryTimeEntryRepository  implements TimeEntryRepository{
-    private List<TimeEntry> timeEntryList = new ArrayList<TimeEntry>();
+public class InMemoryTimeEntryRepository implements TimeEntryRepository {
+    private HashMap<Long, TimeEntry> timeEntries = new HashMap<>();
+
+    private long currentId = 1L;
 
     @Override
     public TimeEntry create(TimeEntry timeEntry) {
-        timeEntryList.add(timeEntry);
-        return timeEntry;
+        Long id = currentId++;
+
+        TimeEntry newTimeEntry = new TimeEntry(
+                id,
+                timeEntry.getProjectId(),
+                timeEntry.getUserId(),
+                timeEntry.getDate(),
+                timeEntry.getHours()
+        );
+
+        timeEntries.put(id, newTimeEntry);
+        return newTimeEntry;
     }
 
     @Override
-    public TimeEntry find(long id) {
-        TimeEntry retTimeEntry = null;
-        for(TimeEntry timeEntry : timeEntryList){
-            if(timeEntry.getId() == id){
-                retTimeEntry = timeEntry;
-                break;
-            }
-        }
-        return retTimeEntry;
-    }
-
-    @Override
-    public TimeEntry update(long id, TimeEntry timeEntry) {
-        TimeEntry itemTimeEntry = find(id);
-        if(itemTimeEntry != null){
-            itemTimeEntry.setDate(timeEntry.getDate());
-            itemTimeEntry.setHours(timeEntry.getHours());
-            itemTimeEntry.setProjectId(timeEntry.getProjectId());
-            itemTimeEntry.setUserId(timeEntry.getUserId());
-        }
-        return itemTimeEntry;
-    }
-
-    @Override
-    public TimeEntry delete(long id) {
-        TimeEntry itemTimeEntry = find(id);
-        timeEntryList.remove( itemTimeEntry );
-        return itemTimeEntry;
+    public TimeEntry find(Long id) {
+        return timeEntries.get(id);
     }
 
     @Override
     public List<TimeEntry> list() {
-        return timeEntryList;
+        return new ArrayList<>(timeEntries.values());
+    }
+
+    @Override
+    public TimeEntry update(Long id, TimeEntry timeEntry) {
+        if (find(id) == null) return null;
+
+        TimeEntry updatedEntry = new TimeEntry(
+                id,
+                timeEntry.getProjectId(),
+                timeEntry.getUserId(),
+                timeEntry.getDate(),
+                timeEntry.getHours()
+        );
+
+        timeEntries.replace(id, updatedEntry);
+        return updatedEntry;
+    }
+
+    @Override
+    public void delete(Long id) {
+        timeEntries.remove(id);
     }
 }
